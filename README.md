@@ -2,7 +2,7 @@
 
 A lightweight C# console application for capturing and streaming video data using the RTMP (Real-Time Messaging Protocol) protocol. This is a test project demonstrating live streaming server capabilities.
 
-## 🚀 Features
+##  Features
 
 - **RTMP Server**: Built-in RTMP server for receiving and handling streaming data
 - **Real-time Video Streaming**: Capture and stream video data in real-time
@@ -10,19 +10,19 @@ A lightweight C# console application for capturing and streaming video data usin
 - **Cross-platform**: Built on .NET 9.0 for cross-platform compatibility
 - **Simple Setup**: Minimal configuration required to get started
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **.NET 9.0**: Latest .NET framework
 - **C#**: Primary programming language
 - **LiveStreamingServerNet**: Core streaming library (v0.31.1)
 - **Microsoft.Extensions.Logging**: Logging framework (v9.0.7)
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - .NET 9.0 SDK or later
 - Visual Studio 2022 or JetBrains Rider (optional, for development)
 
-## 🔧 Installation
+##  Installation
 
 1. Clone the repository:
 ```bash
@@ -40,7 +40,7 @@ dotnet restore
 dotnet build
 ```
 
-## 🎯 Usage
+##  Usage
 
 Run the application:
 ```bash
@@ -52,7 +52,7 @@ The server will start and listen on:
 - **IP Address**: Any (0.0.0.0)
 - **Port**: 1935 (default RTMP port)
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 StreamingConsoleApp/
@@ -63,7 +63,7 @@ StreamingConsoleApp/
 └── README.md                   # This file
 ```
 
-## 🔌 Core Components
+##  Core Components
 
 ### Main Application (Program.cs)
 - Initializes the LiveStreamingServer
@@ -75,13 +75,13 @@ StreamingConsoleApp/
 - **LiveStreamingServerNet**: Provides RTMP server functionality
 - **Microsoft.Extensions.Logging.Console**: Enables console-based logging
 
-## 🌐 RTMP Connection
+##  RTMP Connection
 
 To stream to this server, use any RTMP-compatible streaming software (like OBS Studio) with:
 - **Server URL**: `rtmp://localhost:1935/live`
 - **Stream Key**: (configure as needed)
 
-## 🔍 Testing
+##  Testing
 
 This is a test project designed to demonstrate:
 - RTMP protocol implementation
@@ -89,7 +89,7 @@ This is a test project designed to demonstrate:
 - Server-side streaming capabilities
 - Console-based monitoring and logging
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -97,11 +97,11 @@ This is a test project designed to demonstrate:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+##  License
 
 This project is available for educational and testing purposes.
 
-## 📞 Contact
+##  Contact
 
 **Author**: Saba Burduli  
 **Repository**: [StreamingConsoleApp](https://github.com/Saba-Burduli/StreamingConsoleApp)
