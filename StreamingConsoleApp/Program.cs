@@ -16,6 +16,7 @@ using var server = LiveStreamingServerBuilder.Create()
 
 await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
 
+
 //RTMP + HLS Config :
  // var outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
  //
