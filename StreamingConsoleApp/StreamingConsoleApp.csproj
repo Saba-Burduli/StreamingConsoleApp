@@ -12,6 +12,8 @@
       <PackageReference Include="LiveStreamingServerNet" Version="0.31.1" />
       <PackageReference Include="LiveStreamingServerNet.StreamProcessor" Version="0.31.1" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.7" />
+      <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
     </ItemGroup>
 
     <ItemGroup>
