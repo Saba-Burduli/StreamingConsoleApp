@@ -47,6 +47,7 @@ public static class Program
 
             await app.RunAsync();
         }
+        
 
         private static IServiceCollection AddLiveStreamingServer(this IServiceCollection services)
         {
