@@ -55,7 +55,7 @@ public static class Program
                 new IPEndPoint(IPAddress.Any, 1935),
                 options => options
                     .Configure(options => options.EnableGopCaching = false)
-                    .AddStreamProcessor(options =>
+                    .AddStreamProcessor(options=>
                     {
                         options.AddStreamProcessorEventHandler(svc =>
                             new StreamProcessorEventListener(
