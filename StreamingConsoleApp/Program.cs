@@ -1,19 +1,19 @@
-﻿using System.Net;
+﻿using System.ComponentModel;
 using LiveStreamingServerNet;
-using LiveStreamingServerNet.StreamProcessor.Contracts;
-using LiveStreamingServerNet.StreamProcessor.Hls.Configurations;
-using LiveStreamingServerNet.StreamProcessor.Installer;
-using LiveStreamingServerNet.Utilities.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using LiveStreamingServerNet.StreamProcessor.Utilities;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.StaticFiles;
+using LiveStreamingServerNet.Rtmp;
+using LiveStreamingServerNet.StreamProcessor.AspNetCore.Configurations;
+using LiveStreamingServerNet.StreamProcessor.AspNetCore.Installer;
+using LiveStreamingServerNet.StreamProcessor.Contracts;
+using LiveStreamingServerNet.StreamProcessor.Hls.Contracts;
+using LiveStreamingServerNet.StreamProcessor.Installer;
+using LiveStreamingServerNet.Utilities.Contracts;
+using System.Net;
 
 namespace StreamingConsoleApp;
 
-//2mile RTMP Config :
+//2 Mile RTMP Config (Project Name: LiveStreamingServer.BaseDemo) :
 /*
 using var server = LiveStreamingServerBuilder.Create()
     .ConfigureLogging(options => options.AddConsole())
@@ -22,8 +22,9 @@ using var server = LiveStreamingServerBuilder.Create()
 await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
 */
 
-//RTMP + HLS Config :
-public static class Program
+
+//RTMP + HLS Config (Project Name : LiveStreamingServerNet.Adaptive.HlsDemo) :
+/*public static class Program
     { 
         public static async Task Main(string[] args)
         {
@@ -120,4 +121,54 @@ public static class Program
                 return Task.CompletedTask;
             }
         }
+    }*/
+    
+// Full HlsDemo (Project Name : LiveStreamingServerNet.HlsDemo)
+/*public static class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var outputDir = Path.Combine(Directory.GetCurrentDirectory(), "hls-output");
+        new DirectoryInfo(outputDir).Create();
+
+        var builder = WebApplication.CreateBuilder(args);
+        
+        builder.Services.AddLiveStreamingServer(outputDir);
+
+        builder.Services.AddCors(options =>
+            options.AddDefaultPolicy(policy =>
+                policy.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+            )
+        );
+
+        var app = builder.Build();
+        app.UseCors();
+
+        app.UseHlsFiles(new HlsServingOptions
+        {
+            Root = outputDir,
+            RequestPath = "/hls"
+        });
+
+        await app.RunAsync();
     }
+
+    private static IServiceCollection AddLiveStreamingServer(this IServiceCollection services , string outputDir)
+    {
+        return services.AddLiveStreamingServer(
+            new IPEndPoint(IPAddress.Any,1035),
+            options => options
+                .Configure(options=>options.EnableGopCaching = false)
+                .AddVideoCodecFilter(builder=> builder.Include(VideoCodec.AVC).Include(VideoCodec.HEVC))
+                .AddAudioCodecFilter(builder=>builder.Include(AudioCodec.AAC))
+                .AddStreamProcessor(option=>
+                {
+                    options.AddStreamProcessorEventHandler(option=>
+                    new streaming )
+                }))
+    }
+
+}*/
+    
