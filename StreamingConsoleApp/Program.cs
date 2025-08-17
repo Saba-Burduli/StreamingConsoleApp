@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using LiveStreamingServerNet.StreamProcessor.Utilities;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
 
-namespace LiveStreamingServerNet.AdaptiveHlsDemoMyVersion;
+namespace StreamingConsoleApp;
 
 //2mile RTMP Config :
 /*
@@ -22,7 +24,7 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
 
 //RTMP + HLS Config :
 public static class Program
-    {
+    { 
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
