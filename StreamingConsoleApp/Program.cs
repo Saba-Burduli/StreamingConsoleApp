@@ -213,7 +213,6 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
                 outputPath = Path.GetRelativePath(_outputDir, outputPath);
                 _logger.LogInformation($"[{identifier}] Streaming processor {processor} stopped: {inputPath} -> {outputPath}");
                 return Task.CompletedTask;
-                
             }
         }
     }
