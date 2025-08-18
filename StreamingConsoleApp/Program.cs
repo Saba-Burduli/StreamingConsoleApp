@@ -10,6 +10,8 @@ using LiveStreamingServerNet.StreamProcessor.Hls.Contracts;
 using LiveStreamingServerNet.StreamProcessor.Installer;
 using LiveStreamingServerNet.Utilities.Contracts;
 using System.Net;
+using LiveStreamingServerNet.StreamProcessor.Hls.Configurations;
+using Microsoft.Extensions.Logging;
 
 namespace StreamingConsoleApp;
 
@@ -124,7 +126,7 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
     }*/
     
 // Full HlsDemo (Project Name : LiveStreamingServerNet.HlsDemo)
-/*public static class Program
+public static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -166,9 +168,8 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
                 .AddStreamProcessor(option=>
                 {
                     options.AddStreamProcessorEventHandler(option=>
-                    new streaming )
+                    new StreamProcesorEventListener(outputDir , svc.GetRequred))
                 }))
-    }
 
-}*/
+}
     
