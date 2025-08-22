@@ -171,11 +171,11 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
                         options.AddStreamProcessorEventHandler(svc =>
                                 new StreamProcessorEventListener(outputDir, svc.GetRequiredService<ILogger<StreamProcessorEventListener>>()));
                     })
-                    .AddHlsTransmuxer(options => options.Configure(config => config.OutputPathResolver = new HlsOutputPathResolver(outputDir)))
+                    .AddHlsTransmuxer(options => options.Configure(config => config.OutputPathResolver = new HlsOutputPathResolver(outputDir)))//check how Transmuxer works  
             );
         }
 
-        private class HlsOutputPathResolver : IHlsOutputPathResolver
+        private class HlsOutputPathResolver : IHlsOutputPathResolver //check whats IHlsOutputPathResolver doing
         {
             private readonly string _outputDir;
 
@@ -184,6 +184,7 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
                 _outputDir = outputDir;
             }
 
+            //check what ValueTask doing
             public ValueTask<string> ResolveOutputPath(IServiceProvider services, Guid contextIdentifier, string streamPath, IReadOnlyDictionary<string, string> streamArguments)
             {
                 return ValueTask.FromResult(Path.Combine(_outputDir, contextIdentifier.ToString(), "output.m3u8"));
@@ -193,7 +194,7 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
         private class StreamProcessorEventListener : IStreamProcessorEventHandler
         {
             private readonly string _outputDir;
-            private readonly ILogger _logger;
+            private readonly ILogger _logger; //check Ilogger
 
             public StreamProcessorEventListener(string outputDir, ILogger<StreamProcessorEventListener> logger)
             {
