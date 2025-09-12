@@ -10,9 +10,13 @@ using LiveStreamingServerNet.StreamProcessor.Hls.Contracts;
 using LiveStreamingServerNet.StreamProcessor.Installer;
 using LiveStreamingServerNet.Utilities.Contracts;
 using System.Net;
+using LiveStreamingServerNet.Networking;
+using LiveStreamingServerNet.Rtmp.Server.Contracts;
 using LiveStreamingServerNet.StreamProcessor.Hls;
 using LiveStreamingServerNet.StreamProcessor.Hls.Configurations;
+using LiveStreamingServerNet.StreamProcessor.Utilities;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace StreamingConsoleApp;
@@ -124,97 +128,105 @@ await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
         }
     }*/
     
-// Full HlsDemo (Project Name : LiveStreamingServerNet.HlsDemo)
- public static class Program
+
+    
+    
+    // Project Name (LiveStreamingServerNet.OnDemandStreamCapturingDemo) For Capturing and Snapshot streamArguments
+    
+    /*public static class Program
     {
-        public static async Task Main(string[] args)
+        public static async Task Main()
         {
-            var outputDir = Path.Combine(Directory.GetCurrentDirectory(), "hls-output");
-            new DirectoryInfo(outputDir).Create();
+            var builder = Host.CreateApplicationBuilder();
 
-            var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddLiveStreamingServer(outputDir);
-
-            builder.Services.AddCors(options =>
-                options.AddDefaultPolicy(policy =>
-                    policy.AllowAnyHeader()
-                          .AllowAnyOrigin()
-                          .AllowAnyMethod()
-                )
-            );
-
-            var app = builder.Build();
-
-            app.UseCors();
-
-            // Given that the scheme is https, the port is 7138, and the stream path is live/demo,
-            // the HLS stream will be available at https://localhost:7138/hls/live/demo/output.m3u8
-            app.UseHlsFiles(new HlsServingOptions
+            var endPoint = new ServerEndPoint(new IPEndPoint(IPAddress.Any, 1935), false);
+            builder.Services.AddLiveStreamingServer(endPoint, options =>
             {
-                Root = outputDir,
-                RequestPath = "/hls"
+                options.AddStreamProcessor()
+                    .AddOnDemandStreamCapturer(options =>
+                    {
+                        options.FFmpegPath = ExecutableFinder.FindExecutableFromPATH("ffmpeg")!;
+                    });
             });
 
+            builder.Services.AddHostedService<StreamCapturer>();
+
+            var app = builder.Build();
             await app.RunAsync();
         }
-        private static IServiceCollection AddLiveStreamingServer(this IServiceCollection services, string outputDir)
-        {
-            return services.AddLiveStreamingServer(
-                new IPEndPoint(IPAddress.Any, 1935),
-                options => options
-                    .Configure(options => options.EnableGopCaching = false)
-                    .AddVideoCodecFilter(builder => builder.Include(VideoCodec.AVC).Include(VideoCodec.HEVC))
-                    .AddAudioCodecFilter(builder => builder.Include(AudioCodec.AAC))
-                    .AddStreamProcessor(options =>
-                    {
-                        options.AddStreamProcessorEventHandler(svc =>
-                                new StreamProcessorEventListener(outputDir, svc.GetRequiredService<ILogger<StreamProcessorEventListener>>()));
-                    })
-                    .AddHlsTransmuxer(options => options.Configure(config => config.OutputPathResolver = new HlsOutputPathResolver(outputDir)))//check how Transmuxer works  
-            );
-        }
-
-        private class HlsOutputPathResolver : IHlsOutputPathResolver //check whats IHlsOutputPathResolver doing
-        {
-            private readonly string _outputDir;
-
-            public HlsOutputPathResolver(string outputDir)
-            {
-                _outputDir = outputDir;
-            }
-
-            //check what ValueTask doing
-            public ValueTask<string> ResolveOutputPath(IServiceProvider services, Guid contextIdentifier, string streamPath, IReadOnlyDictionary<string, string> streamArguments)
-            {
-                return ValueTask.FromResult(Path.Combine(_outputDir, contextIdentifier.ToString(), "output.m3u8"));
-            }
-        }
-
-        private class StreamProcessorEventListener : IStreamProcessorEventHandler
-        {
-            private readonly string _outputDir;
-            private readonly ILogger _logger; //check Ilogger
-
-            public StreamProcessorEventListener(string outputDir, ILogger<StreamProcessorEventListener> logger)
-            {
-                _outputDir = outputDir;
-                _logger = logger;
-            }
-
-            public Task OnStreamProcessorStartedAsync(IEventContext context, string processor, Guid identifier, uint clientId, string inputPath, string outputPath, string streamPath, IReadOnlyDictionary<string, string> streamArguments)
-            {
-                outputPath = Path.GetRelativePath(_outputDir, outputPath);
-                _logger.LogInformation($"[{identifier}] Streaming processor {processor} started: {inputPath} -> {outputPath}");
-                return Task.CompletedTask;
-            }
-
-            public Task OnStreamProcessorStoppedAsync(IEventContext context, string processor, Guid identifier, uint clientId, string inputPath, string outputPath, string streamPath, IReadOnlyDictionary<string, string> streamArguments)
-            {
-                outputPath = Path.GetRelativePath(_outputDir, outputPath);
-                _logger.LogInformation($"[{identifier}] Streaming processor {processor} stopped: {inputPath} -> {outputPath}");
-                return Task.CompletedTask;
-            }
-        }
     }
+
+    public class StreamCapturer : BackgroundService
+    {
+        private readonly IRtmpStreamInfoManager _streamInfoManager;
+        private readonly IOnDemandStreamCapturer _capturer;
+        private readonly ILogger<StreamCapturer> _logger;
+        private readonly string _outputDir;
+
+        private const int MaxConcurrency = 10;
+
+        public StreamCapturer(IRtmpStreamInfoManager streamInfoManager, IOnDemandStreamCapturer capturer, ILogger<StreamCapturer> logger)
+        {
+            _streamInfoManager = streamInfoManager;
+            _capturer = capturer;
+            _logger = logger;
+
+            _outputDir = Path.Combine(Directory.GetCurrentDirectory(), "capture-output");
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var streamInfos = _streamInfoManager.GetStreamInfos();
+
+                foreach (var streams in streamInfos.Chunk(MaxConcurrency))
+                {
+                    await Task.WhenAll(streams.Select(async s =>
+                    {
+                        try
+                        {
+                            var outputDir = Path.Combine(_outputDir, s.Publisher.Id.ToString());
+                            new DirectoryInfo(outputDir).Create();
+
+                            // Use extensions such as .png, .jpg, .bmp, .tiff, .webp
+                            var snapshotOutputPath = Path.Combine(outputDir, "snapshot.png");
+                            await _capturer.CaptureSnapshotAsync(
+                                streamPath: s.StreamPath,
+                                streamArguments: s.StreamArguments,
+                                outputPath: Path.Combine(_outputDir, snapshotOutputPath),
+                                height: 512,
+                                cancellationToken: stoppingToken
+                            );
+
+                            _logger.LogInformation("Captured stream {StreamPath} to {OutputPath}", s.StreamPath, snapshotOutputPath);
+
+                            // Use extensions such as .webp, .webm, .gif, .mp4
+                            var webpOutputPath = Path.Combine(outputDir, "clip.webp");
+                            await _capturer.CaptureClipAsync(
+                                streamPath: s.StreamPath,
+                                streamArguments: s.StreamArguments,
+                                outputPath: Path.Combine(_outputDir, webpOutputPath),
+                                options: new ClipCaptureOptions(TimeSpan.FromSeconds(3))
+                                {
+                                    Framerate = 24,
+                                    Height = 512
+                                },
+                                cancellationToken: stoppingToken
+                            );
+
+                            _logger.LogInformation("Captured clip from stream {StreamPath} to {OutputPath}", s.StreamPath, webpOutputPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError("Error capturing stream {StreamPath}: {Exception}", s.StreamPath, ex);
+                        }
+                    }));
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            }
+        }
+    }*/
+    
     
