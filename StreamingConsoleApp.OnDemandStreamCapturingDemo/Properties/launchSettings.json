@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "StreamingConsoleApp.OnDemandStreamCapturingDemo": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+     "commandName": "Docker" 
+    }
+  }
+}
