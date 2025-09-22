@@ -8,7 +8,6 @@
 
 
 
-
 # StreamingConsoleApp
 
 A lightweight C# console application for capturing and streaming video data using the RTMP (Real-Time Messaging Protocol) protocol. This is a test project demonstrating live streaming server capabilities.
